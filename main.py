@@ -76,6 +76,17 @@ class Brick(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def update(self):
+        if pygame.sprite.spritecollide(self, player_group, False):
+            if player.dir == "left":
+                player.rect.left = self.rect.right
+            if player.dir == "right":
+                player.rect.right = self.rect.left
+            if player.dir == "top":
+                player.rect.top = self.rect.bottom
+            if player.dir == "bottom":
+                player.rect.bottom = self.rect.top
+
 
 class Bush(pygame.sprite.Sprite):
     def __init__(self, image, pos):
@@ -103,6 +114,17 @@ class Water(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def update(self):
+        if pygame.sprite.spritecollide(self, player_group, False):
+            if player.dir == "left":
+                player.rect.left = self.rect.right
+            if player.dir == "right":
+                player.rect.right = self.rect.left
+            if player.dir == "top":
+                player.rect.top = self.rect.bottom
+            if player.dir == "bottom":
+                player.rect.bottom = self.rect.top
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, image, pos):
@@ -111,6 +133,27 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+        self.speed = 5
+        self.dir = "top"
+
+    def update(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.image = pygame.transform.rotate(player_image, 90)
+            self.rect.x = self.rect.x - self.speed
+            self.dir = "left"
+        if key[pygame.K_d]:
+            self.image = pygame.transform.rotate(player_image, 270)
+            self.rect.x = self.rect.x + self.speed
+            self.dir = "right"
+        if key[pygame.K_w]:
+            self.image = pygame.transform.rotate(player_image, 360)
+            self.rect.y = self.rect.y - self.speed
+            self.dir = "top"
+        if key[pygame.K_s]:
+            self.image = pygame.transform.rotate(player_image, 180)
+            self.rect.y = self.rect.y + self.speed
+            self.dir = "bottom"
 
 
 class Enemy(pygame.sprite.Sprite):
