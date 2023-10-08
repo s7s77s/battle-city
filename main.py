@@ -259,6 +259,7 @@ flag_group = pygame.sprite.Group()
 player = Player(player_image, (200, 640))
 player_group.add(player)
 
+
 drawMaps('1.txt')
 
 while True:
