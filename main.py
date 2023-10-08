@@ -105,6 +105,17 @@ class Iron(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+    def update(self):
+        if pygame.sprite.spritecollide(self, player_group, False):
+            if player.dir == "left":
+                player.rect.left = self.rect.right
+            if player.dir == "right":
+                player.rect.right = self.rect.left
+            if player.dir == "top":
+                player.rect.top = self.rect.bottom
+            if player.dir == "bottom":
+                player.rect.bottom = self.rect.top
+
 
 class Water(pygame.sprite.Sprite):
     def __init__(self, image, pos):
@@ -163,6 +174,70 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+        self.speed = 2
+        self.dir = "top"
+        self.timer_movie = 0
+
+    def update(self):
+        self.timer_movie = self.timer_movie + 1
+        if self.timer_movie / FPS > 2:
+            if random.randint(1, 4) == 1:
+                self.dir = "top"
+                self.timer_movie = 0
+            elif random.randint(1, 4) == 2:
+                self.dir = "bottom"
+                self.timer_movie = 0
+            elif random.randint(1, 4) == 3:
+                self.dir = "left"
+                self.timer_movie = 0
+            elif random.randint(1, 4) == 4:
+                self.dir = "right"
+                self.timer_movie = 0
+
+        if self.dir == "top":
+            self.image = pygame.transform.rotate(enemy_image, 0)
+            self.rect.y = self.rect.y - self.speed
+        elif self.dir == "bottom":
+            self.image = pygame.transform.rotate(enemy_image, 180)
+            self.rect.y = self.rect.y + self.speed
+        elif self.dir == "left":
+            self.image = pygame.transform.rotate(enemy_image, 90)
+            self.rect.x = self.rect.x - self.speed
+        elif self.dir == "right":
+            self.image = pygame.transform.rotate(enemy_image, 270)
+            self.rect.x = self.rect.x + self.speed
+        if pygame.sprite.spritecollide(self, brick_group, False):
+            self.timer_movie = 0
+            if self.dir == "top":
+                self.dir = "bottom"
+            elif self.dir == "bottom":
+                self.dir = "top"
+            elif self.dir == "left":
+                self.dir = "right"
+            elif self.dir == "right":
+                self.dir = "left"
+
+        if pygame.sprite.spritecollide(self, water_group, False):
+            self.timer_movie = 0
+            if self.dir == "top":
+                self.dir = "bottom"
+            elif self.dir == "bottom":
+                self.dir = "top"
+            elif self.dir == "left":
+                self.dir = "right"
+            elif self.dir == "right":
+                self.dir = "left"
+
+        if pygame.sprite.spritecollide(self, iron_group, False):
+            self.timer_movie = 0
+            if self.dir == "top":
+                self.dir = "bottom"
+            elif self.dir == "bottom":
+                self.dir = "top"
+            elif self.dir == "left":
+                self.dir = "right"
+            elif self.dir == "right":
+                self.dir = "left"
 
 
 class Flag(pygame.sprite.Sprite):
