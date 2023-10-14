@@ -21,8 +21,6 @@ def lvlgame():
     sc.fill("black")
     brick_group.update()
     brick_group.draw(sc)
-    bush_group.update()
-    bush_group.draw(sc)
     iron_group.update()
     iron_group.draw(sc)
     water_group.update()
@@ -33,6 +31,12 @@ def lvlgame():
     player_group.draw(sc)
     flag_group.update()
     flag_group.draw(sc)
+    bullet_player_group.update()
+    bullet_player_group.draw(sc)
+    bullet_enemy_group.update()
+    bullet_enemy_group.draw(sc)
+    bush_group.update()
+    bush_group.draw(sc)
     pygame.display.update()
 
 
@@ -86,6 +90,8 @@ class Brick(pygame.sprite.Sprite):
                 player.rect.top = self.rect.bottom
             if player.dir == "bottom":
                 player.rect.bottom = self.rect.top
+        pygame.sprite.groupcollide(bullet_player_group, brick_group, True, True)
+        pygame.sprite.groupcollide(bullet_enemy_group, brick_group, True, True)
 
 
 class Bush(pygame.sprite.Sprite):
@@ -115,6 +121,8 @@ class Iron(pygame.sprite.Sprite):
                 player.rect.top = self.rect.bottom
             if player.dir == "bottom":
                 player.rect.bottom = self.rect.top
+        pygame.sprite.groupcollide(bullet_player_group, iron_group, True, False)
+        pygame.sprite.groupcollide(bullet_enemy_group, iron_group, True, False)
 
 
 class Water(pygame.sprite.Sprite):
@@ -146,25 +154,32 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = pos[1]
         self.speed = 5
         self.dir = "top"
+        self.timer_shoot = 0
 
     def update(self):
+        self.timer_shoot += 1
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
             self.image = pygame.transform.rotate(player_image, 90)
             self.rect.x = self.rect.x - self.speed
             self.dir = "left"
-        if key[pygame.K_d]:
+        elif key[pygame.K_d]:
             self.image = pygame.transform.rotate(player_image, 270)
             self.rect.x = self.rect.x + self.speed
             self.dir = "right"
-        if key[pygame.K_w]:
+        elif key[pygame.K_w]:
             self.image = pygame.transform.rotate(player_image, 360)
             self.rect.y = self.rect.y - self.speed
             self.dir = "top"
-        if key[pygame.K_s]:
+        elif key[pygame.K_s]:
             self.image = pygame.transform.rotate(player_image, 180)
             self.rect.y = self.rect.y + self.speed
             self.dir = "bottom"
+        if key[pygame.K_SPACE] and self.timer_shoot / FPS > 1:
+            bullet = Bullet_player(player_bullet, self.rect.center, self.dir)
+            bullet_player_group.add(bullet)
+            self.timer_shoot = 0
+        pygame.sprite.groupcollide(bullet_enemy_group, player_group, True, True)
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -177,9 +192,11 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = 2
         self.dir = "top"
         self.timer_movie = 0
+        self.timer_shoot = 0
 
     def update(self):
-        self.timer_movie = self.timer_movie + 1
+        self.timer_shoot += 1
+        self.timer_movie += 1
         if self.timer_movie / FPS > 2:
             if random.randint(1, 4) == 1:
                 self.dir = "top"
@@ -206,6 +223,7 @@ class Enemy(pygame.sprite.Sprite):
         elif self.dir == "right":
             self.image = pygame.transform.rotate(enemy_image, 270)
             self.rect.x = self.rect.x + self.speed
+
         if pygame.sprite.spritecollide(self, brick_group, False):
             self.timer_movie = 0
             if self.dir == "top":
@@ -238,6 +256,11 @@ class Enemy(pygame.sprite.Sprite):
                 self.dir = "right"
             elif self.dir == "right":
                 self.dir = "left"
+        if self.timer_shoot / FPS > 1.5:
+            bullet_enemy = Bullet_enemy(enemy_bullet, self.rect.center, self.dir)
+            bullet_enemy_group.add(bullet_enemy)
+            self.timer_shoot = 0
+        pygame.sprite.groupcollide(bullet_player_group, enemy_group, True, True)
 
 
 class Flag(pygame.sprite.Sprite):
@@ -247,6 +270,52 @@ class Flag(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+
+    def update(self):
+        pygame.sprite.groupcollide(bullet_player_group, flag_group, True, True)
+        pygame.sprite.groupcollide(bullet_enemy_group, flag_group, True, True)
+
+
+class Bullet_player(pygame.sprite.Sprite):
+    def __init__(self, image, pos, dir):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.dir = dir
+        self.speed = 6
+
+    def update(self):
+        if self.dir == "left":
+            self.rect.x = self.rect.x - self.speed
+        elif self.dir == "right":
+            self.rect.x = self.rect.x + self.speed
+        elif self.dir == "top":
+            self.rect.y = self.rect.y - self.speed
+        elif self.dir == "bottom":
+            self.rect.y = self.rect.y + self.speed
+
+
+class Bullet_enemy(pygame.sprite.Sprite):
+    def __init__(self, image, pos, dir):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.dir = dir
+        self.speed = 5
+
+    def update(self):
+        if self.dir == "left":
+            self.rect.x = self.rect.x - self.speed
+        elif self.dir == "right":
+            self.rect.x = self.rect.x + self.speed
+        elif self.dir == "top":
+            self.rect.y = self.rect.y - self.speed
+        elif self.dir == "bottom":
+            self.rect.y = self.rect.y + self.speed
 
 
 brick_group = pygame.sprite.Group()
@@ -258,7 +327,8 @@ enemy_group = pygame.sprite.Group()
 flag_group = pygame.sprite.Group()
 player = Player(player_image, (200, 640))
 player_group.add(player)
-
+bullet_player_group = pygame.sprite.Group()
+bullet_enemy_group = pygame.sprite.Group()
 
 drawMaps('1.txt')
 
