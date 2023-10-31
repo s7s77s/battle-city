@@ -12,7 +12,8 @@ FPS = 60
 sc = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('battle city')
-lvl = 'game'
+lvl = "menu"
+font = pygame.font.SysFont('aria', 30)
 
 from load import *
 
@@ -70,6 +71,32 @@ def drawMaps(nameFile):
             elif maps[i][j] == '5':
                 flag = Flag(flag_image, pos)
                 flag_group.add(flag)
+
+
+def startMenu():
+    sc.fill('grey')
+    button_group.draw(sc)
+    button_group.update()
+    pygame.display.update()
+
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, image, pos, next_lvl, text):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.next_lvl = next_lvl
+        self.text = text
+
+    def update(self):
+        global lvl
+        text_render = font.render(self.text, True, 'white')
+        sc.blit(text_render, (self.rect.x + 80, self.rect.y + 5))
+        click = pygame.mouse.get_pos()
+        if pygame.mouse.get_pressed()[0]:
+            if self.rect.left < click[0] < self.rect.right and self.rect.top < click[1] < self.rect.bottom:
+                lvl = self.next_lvl
 
 
 class Brick(pygame.sprite.Sprite):
@@ -329,14 +356,25 @@ player = Player(player_image, (200, 640))
 player_group.add(player)
 bullet_player_group = pygame.sprite.Group()
 bullet_enemy_group = pygame.sprite.Group()
-
 drawMaps('1.txt')
+button_group = pygame.sprite.Group()
+
+button_start = Button(button_image, (500, 100), 'game', 'start')
+button_group.add(button_start)
+
+button_exit = Button(button_image, (500, 180), 'exit', 'exit')
+button_group.add(button_exit)
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-    if lvl == 'game':
+    if lvl == "game":
         lvlgame()
+    elif lvl == 'menu':
+        startMenu()
+    elif lvl == 'exit':
+        pygame.quit()
+        sys.exit()
     clock.tick(FPS)
