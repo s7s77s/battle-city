@@ -97,6 +97,9 @@ class Button(pygame.sprite.Sprite):
         if pygame.mouse.get_pressed()[0]:
             if self.rect.left < click[0] < self.rect.right and self.rect.top < click[1] < self.rect.bottom:
                 lvl = self.next_lvl
+                if lvl == 'game':
+                    restart()
+                    drawMaps('1.txt')
 
 
 class Brick(pygame.sprite.Sprite):
@@ -345,23 +348,25 @@ class Bullet_enemy(pygame.sprite.Sprite):
             self.rect.y = self.rect.y + self.speed
 
 
-brick_group = pygame.sprite.Group()
-bush_group = pygame.sprite.Group()
-iron_group = pygame.sprite.Group()
-water_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-enemy_group = pygame.sprite.Group()
-flag_group = pygame.sprite.Group()
-player = Player(player_image, (200, 640))
-player_group.add(player)
-bullet_player_group = pygame.sprite.Group()
-bullet_enemy_group = pygame.sprite.Group()
-drawMaps('1.txt')
-button_group = pygame.sprite.Group()
+def restart():
+    global water_group, brick_group, bush_group, iron_group
+    global player_group, enemy_group, flag_group, bullet_player_group, player, bullet_enemy_group
+    brick_group = pygame.sprite.Group()
+    bush_group = pygame.sprite.Group()
+    iron_group = pygame.sprite.Group()
+    water_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    enemy_group = pygame.sprite.Group()
+    flag_group = pygame.sprite.Group()
+    player = Player(player_image, (200, 640))
+    player_group.add(player)
+    bullet_player_group = pygame.sprite.Group()
+    bullet_enemy_group = pygame.sprite.Group()
 
+
+button_group = pygame.sprite.Group()
 button_start = Button(button_image, (500, 100), 'game', 'start')
 button_group.add(button_start)
-
 button_exit = Button(button_image, (500, 180), 'exit', 'exit')
 button_group.add(button_exit)
 
