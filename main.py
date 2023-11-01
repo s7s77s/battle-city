@@ -13,6 +13,8 @@ sc = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('battle city')
 lvl = "menu"
+lvl_game = 1
+score = 0
 font = pygame.font.SysFont('aria', 30)
 
 from load import *
@@ -39,6 +41,11 @@ def lvlgame():
     bush_group.update()
     bush_group.draw(sc)
     pygame.display.update()
+    global lvl_game
+    if len(enemy_group) == 0:
+        lvl_game += 1
+        restart()
+        drawMaps(str(lvl_game) + '.txt')
 
 
 def drawMaps(nameFile):
@@ -223,6 +230,8 @@ class Enemy(pygame.sprite.Sprite):
         self.dir = "top"
         self.timer_movie = 0
         self.timer_shoot = 0
+        self.trigger = False
+        self.atack_dir = ' '
 
     def update(self):
         self.timer_shoot += 1
@@ -291,6 +300,39 @@ class Enemy(pygame.sprite.Sprite):
             bullet_enemy_group.add(bullet_enemy)
             self.timer_shoot = 0
         pygame.sprite.groupcollide(bullet_player_group, enemy_group, True, True)
+        d = ((self.rect.center[0] - player.rect.center[0]) ** 2
+             + (self.rect.center[1] - player.rect.center[1]) ** 2) ** (1 / 2)
+        if d < 300:
+            self.trigger = True
+        if self.trigger:
+            pos_player = player.rect.center
+            pos = self.rect.center
+            if pos[0] - pos_player[0] > 0:
+                if pos[1] - pos_player[1] > 0:
+                    self.atack_dir = ('left', 'top')
+                else:
+                    self.atack_dir = ('left', 'bottom')
+            else:
+                if pos[1] - pos_player[1] > 0:
+                    self.atack_dir = ('right', 'top')
+                else:
+                    self.atack_dir = ('right', 'bottom')
+            if self.atack_dir == ('left', 'top'):
+                self.dir = 'left'
+                if abs(pos[0] - pos_player[0]) < 20:
+                    self.dir = 'top'
+                elif self.atack_dir == ('left', 'bottom'):
+                    self.dir = 'left'
+                    if abs(pos[0] - pos_player[0]) < 20:
+                        self.dir = 'bottom'
+                elif self.atack_dir == ('right', 'top'):
+                    self.dir = 'right'
+                    if abs(pos[0] - pos_player[0]) < 20:
+                        self.dir = 'top'
+                elif self.atack_dir == ('right', 'bottom'):
+                    self.dir = 'right'
+                    if abs(pos[0] - pos_player[0]) < 20:
+                        self.dir = 'bottom'
 
 
 class Flag(pygame.sprite.Sprite):
@@ -358,10 +400,10 @@ def restart():
     player_group = pygame.sprite.Group()
     enemy_group = pygame.sprite.Group()
     flag_group = pygame.sprite.Group()
-    player = Player(player_image, (200, 640))
-    player_group.add(player)
     bullet_player_group = pygame.sprite.Group()
     bullet_enemy_group = pygame.sprite.Group()
+    player = Player(player_image, (100, 400))
+    player_group.add(player)
 
 
 button_group = pygame.sprite.Group()
