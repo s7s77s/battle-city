@@ -21,6 +21,7 @@ from load import *
 
 
 def lvlgame():
+    global lvl, lvl_game
     sc.fill("black")
     brick_group.update()
     brick_group.draw(sc)
@@ -41,11 +42,17 @@ def lvlgame():
     bush_group.update()
     bush_group.draw(sc)
     pygame.display.update()
-    global lvl_game
+    if len(player_group) == 0:
+        lvl = 'menu'
     if len(enemy_group) == 0:
         lvl_game += 1
         restart()
-        drawMaps(str(lvl_game) + '.txt')
+        if lvl_game <= 2:
+            drawMaps(str(lvl_game) + '.txt')
+        else:
+            lvl = 'menu'
+    if len(flag_group) == 0:
+        lvl = 'menu'
 
 
 def drawMaps(nameFile):
@@ -398,6 +405,7 @@ def restart():
     iron_group = pygame.sprite.Group()
     water_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
+    bomba_group = pygame.sprite.Group
     enemy_group = pygame.sprite.Group()
     flag_group = pygame.sprite.Group()
     bullet_player_group = pygame.sprite.Group()
